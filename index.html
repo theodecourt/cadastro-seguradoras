@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro e Nomeação · Segura</title>
+<meta name="description" content="Formulário de cadastro e nomeação de corretoras junto às seguradoras parceiras da Segura.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green-900:#04342C; --green-700:#0F6E56; --green-600:#15805F; --green-500:#1D9E75;
+    --green-100:#DDF2E9; --green-50:#F2FAF6;
+    --coral:#D85A30; --coral-bg:#FBE6DC;
+    --red:#C0392B; --red-bg:#FDECEA; --red-line:#F0B4AC;
+    --ink:#0E1512; --ink-soft:#5C6B65; --line:#DDE7E2;
+    --paper:#FFFFFF; --bg:#F6F9F7;
+    --radius:16px; --shadow:0 1px 2px rgba(4,52,44,0.04), 0 8px 24px rgba(4,52,44,0.06);
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.brandmark{font-family:'Sora',system-ui,sans-serif;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px clamp(20px,5vw,56px);border-bottom:1px solid var(--line);background:var(--paper);position:sticky;top:0;z-index:20;}
+  .brandmark{font-weight:700;font-size:19px;color:var(--green-900);letter-spacing:-0.01em;display:flex;align-items:center;gap:8px;}
+  .brandmark .dot{width:9px;height:9px;border-radius:50%;background:var(--green-500);display:inline-block;}
+  .topbar-meta{font-size:13px;color:var(--ink-soft);}
+  @media (max-width:520px){ .topbar-meta{display:none;} }
+
+  .shell{max-width:980px;margin:0 auto;padding:clamp(20px,4vw,40px) clamp(16px,5vw,32px) 96px;}
+
+  .setup-warn{background:#FFF4E9;border:1px solid #F0C89A;color:#8A5210;border-radius:12px;padding:12px 16px;font-size:13px;margin-bottom:18px;}
+  .setup-warn code{background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px;font-size:12px;}
+
+  /* tabs (2 etapas) */
+  .tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--line);border-radius:16px;overflow:hidden;margin-bottom:24px;border:1px solid var(--line);}
+  .tab{background:var(--paper);padding:16px 18px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:background .15s;}
+  .tab:hover{background:var(--green-50);}
+  .tab.active{background:var(--green-900);}
+  .tab.active .tab-title, .tab.active .tab-sub{color:#fff;}
+  .tab.active .tab-num{background:#fff;color:var(--green-900);border-color:#fff;}
+  .tab.locked{cursor:not-allowed;opacity:.55;}
+  .tab.locked:hover{background:var(--paper);}
+  .tab-num{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink-soft);flex-shrink:0;}
+  .tab.done .tab-num{background:var(--green-600);border-color:var(--green-600);color:#fff;}
+  .tab.done .tab-num::before{content:"✓";}
+  .tab-title{font-size:14px;font-weight:700;color:var(--ink);}
+  .tab-sub{font-size:11.5px;color:var(--ink-soft);}
+  @media (max-width:560px){ .tab-sub{display:none;} }
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:clamp(22px,4vw,40px);}
+  .eyebrow{font-size:12px;font-weight:600;color:var(--green-700);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px;}
+  .step-title{font-size:clamp(19px,2.2vw,24px);font-weight:600;margin:0 0 8px;color:var(--green-900);letter-spacing:-0.01em;}
+  .step-sub{font-size:14px;color:var(--ink-soft);margin:0 0 24px;max-width:620px;}
+
+  label.field-label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+  label.field-label .req{color:var(--coral);margin-left:2px;}
+  .hint{font-size:12px;color:var(--ink-soft);margin:2px 0 0;}
+  input[type=text], input[type=email], input[type=tel]{width:100%;min-height:44px;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-family:'Inter',sans-serif;font-size:14.5px;color:var(--ink);background:var(--paper);}
+  input::placeholder{color:#A9B6B0;}
+  input:focus{outline:none;border-color:var(--green-600);box-shadow:0 0 0 3px var(--green-100);}
+  .field{margin-bottom:16px;}
+  .field.err input{border-color:var(--red-line);background:var(--red-bg);}
+  .err-msg{font-size:12px;color:var(--red);margin:5px 0 0;font-weight:500;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:560px){.field-row{grid-template-columns:1fr;}}
+
+  /* grid de seguradoras */
+  .insurer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px;}
+  .icard{position:relative;border:1.5px solid var(--line);border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s;background:var(--paper);}
+  .icard:hover{border-color:var(--green-500);}
+  .icard .name{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .icard.on{border-color:var(--green-600);background:var(--green-50);box-shadow:0 0 0 3px var(--green-100);}
+  .icard.on .name{color:var(--green-700);}
+  .icard.blocked{background:var(--coral-bg);border-color:#EFC3AE;cursor:not-allowed;opacity:.85;}
+  .icard.blocked .name{color:#B0512C;}
+  .icard.already{background:var(--green-100);border-color:var(--green-500);cursor:default;}
+  .icard.already .name{color:var(--green-700);}
+  .icard .badge{position:absolute;top:6px;right:8px;font-size:10px;}
+  .mode-row{display:flex;gap:4px;margin-top:8px;}
+  .mode-pill{flex:1;font-size:9px;line-height:1.25;padding:5px 3px;border-radius:6px;background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);cursor:pointer;text-align:center;}
+  .mode-pill.on{background:var(--green-600);border-color:var(--green-600);color:#fff;font-weight:600;}
+  .mode-pill.on.transfer{background:#B9701A;border-color:#B9701A;}
+
+  .yn-row{display:flex;gap:10px;margin-top:8px;margin-bottom:20px;}
+  .yn{flex:1;text-align:center;padding:11px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;}
+  .yn:hover{border-color:var(--green-500);}
+  .yn.on{background:var(--green-50);border-color:var(--green-600);color:var(--green-700);font-weight:600;}
+  .q-label{font-size:14.5px;font-weight:500;color:var(--ink);margin:0 0 2px;}
+  .q-label .req{color:var(--coral);margin-left:2px;}
+
+  .section{margin-bottom:28px;}
+  .section:last-child{margin-bottom:0;}
+  .section-head{display:flex;align-items:center;gap:10px;padding-bottom:10px;margin-bottom:16px;border-bottom:1.5px solid var(--line);}
+  .section-head .num{width:22px;height:22px;border-radius:50%;background:var(--green-900);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .section-head .t{font-size:15px;font-weight:700;color:var(--green-900);}
+
+  .summary-block{background:var(--green-50);border-radius:14px;padding:18px 20px;margin-bottom:16px;}
+  .summary-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px;}
+  .summary-label.g{color:var(--green-700);}
+  .pill{display:inline-block;font-size:13px;padding:5px 12px;border-radius:999px;margin:0 6px 6px 0;font-weight:500;}
+  .pill.g{background:var(--green-100);color:var(--green-700);}
+
+  .kv{display:grid;grid-template-columns:minmax(140px,180px) 1fr;gap:6px 16px;font-size:13.5px;margin-top:6px;}
+  .kv dt{color:var(--ink-soft);}
+  .kv dd{margin:0;color:var(--ink);font-weight:500;word-break:break-word;}
+  @media (max-width:480px){ .kv{grid-template-columns:1fr;gap:0 0;} .kv dt{margin-top:8px;} }
+
+  .infobox{background:var(--green-50);border-radius:12px;padding:14px 16px;margin-top:8px;font-size:13px;color:var(--green-900);}
+  .errbox{background:var(--red-bg);border:1px solid var(--red-line);border-radius:12px;padding:13px 16px;margin-top:16px;font-size:13px;color:var(--red);font-weight:500;}
+
+  .nav{display:flex;gap:12px;margin-top:28px;}
+  button{font-family:'Inter',sans-serif;font-size:14.5px;font-weight:600;border-radius:11px;cursor:pointer;transition:all .15s;padding:0 20px;height:46px;}
+  .btn-back{flex:0 0 auto;background:transparent;border:1.5px solid var(--line);color:var(--ink-soft);}
+  .btn-back:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .btn-next{flex:1;background:var(--green-700);border:1.5px solid var(--green-700);color:#fff;display:flex;align-items:center;justify-content:center;gap:9px;}
+  .btn-next:hover{background:var(--green-900);border-color:var(--green-900);}
+  .btn-next:disabled{background:#B9C8C2;border-color:#B9C8C2;cursor:not-allowed;}
+  .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .btn-next.loading .spinner{display:block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .done-screen{display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:20px 0;}
+  .done-badge{width:56px;height:56px;border-radius:50%;background:var(--green-600);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .protocol{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--green-50);border:1px solid var(--green-100);color:var(--green-700);padding:8px 12px;border-radius:8px;}
+
+  .draft-note{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:16px;}
+  .draft-note a{color:var(--green-700);cursor:pointer;text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brandmark"><span class="dot"></span>segura<span style="color:var(--green-600)">.ai</span></div>
+  <div class="topbar-meta">Cadastro e Nomeação · Seguradoras</div>
+</div>
+
+<div class="shell">
+  <div id="setup-warn"></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="card" id="card">
+    <div id="content"></div>
+    <div id="form-error"></div>
+    <div class="nav" id="nav">
+      <button class="btn-back" id="back" type="button">Anterior</button>
+      <button class="btn-next" id="next" type="button"><span class="spinner"></span><span id="next-label">Continuar</span></button>
+    </div>
+  </div>
+  <p class="draft-note" id="draft-note"></p>
+</div>
+
+<script>
+/* ============================================================================
+   CONFIGURAÇÃO — edite apenas este bloco
+   ---------------------------------------------------------------------------
+   WEBHOOK_URL = URL do "Catch Hook" (Webhooks by Zapier) do Zap que publica
+   no canal #cadastro-seguradoras do Slack.
+   ========================================================================== */
+const CONFIG = {
+  WEBHOOK_URL: "https://hooks.zapier.com/hooks/catch/18962926/4d4fgfv/",
+  EMAIL_SUPORTE: "cadastro@sejasegura.com.br"
+};
+/* ========================================================================== */
+
+const insurers = ["Akad", "AXA", "Bradesco Auto e Re", "Bradesco Vida e Previdência", "Darwin", "HDI", "Icatu", "Junto", "Justos", "MetLife", "Suhai", "Tokio", "Yelum", "Youse", "Aliro"];
+
+// Overlap simetrizado (se A bloqueia B ou B bloqueia A, os dois se bloqueiam).
+const OVERLAP = {
+  "Akad": ["Tokio"],
+  "AXA": ["Bradesco Auto e Re","Bradesco Vida e Previdência","HDI","Suhai","Tokio","Yelum"],
+  "Bradesco Auto e Re": ["AXA","HDI","Suhai","Tokio","Yelum"],
+  "Bradesco Vida e Previdência": ["AXA","HDI","Icatu","MetLife","Tokio"],
+  "Darwin": ["Tokio"],
+  "HDI": ["AXA","Bradesco Auto e Re","Bradesco Vida e Previdência","MetLife","Suhai","Tokio"],
+  "Icatu": ["Bradesco Vida e Previdência","MetLife","Tokio"],
+  "Junto": ["Tokio"],
+  "Justos": ["Tokio"],
+  "MetLife": ["Bradesco Vida e Previdência","HDI","Icatu","Tokio","Yelum"],
+  "Suhai": ["AXA","Bradesco Auto e Re","HDI","Tokio","Yelum"],
+  "Tokio": ["Akad","AXA","Bradesco Auto e Re","Bradesco Vida e Previdência","Darwin","HDI","Icatu","Junto","Justos","MetLife","Suhai","Yelum","Youse"],
+  "Yelum": ["AXA","Bradesco Auto e Re","MetLife","Suhai","Tokio"],
+  "Youse": ["Tokio"]
+};
+
+// Usado só para montar a lista de pendências na mensagem do Slack — o corretor
+// não anexa nada aqui; o time de cadastro pede a documentação por e-mail depois.
+const GENERAL_DOCS = [
+  'Cópia do Contrato Social, com a última Alteração Contratual (se houver)',
+  'Cópia do Cartão CNPJ da empresa',
+  'Cópia de documento onde conste a Inscrição na Prefeitura',
+  'Cópia da credencial SUSEP da empresa (ativa no momento do cadastro)',
+  'Cópia do comprovante bancário',
+  'Cópia da credencial SUSEP do responsável pela empresa',
+  'Cópia do RG e CPF dos sócios',
+  'Cópia de comprovante de endereço (água, energia, gás, IPTU etc.)',
+  'Cadastro no Simples Nacional (se aplicável)'
+];
+
+const TABS = [
+  {key:'seguradora', title:'Seguradora', sub:'Dados e seguradoras'},
+  {key:'finalizar',  title:'Finalizar',  sub:'Revise e envie'}
+];
+
+const DRAFT_KEY = 'segura_cadastro_rascunho_v2';
+
+const S = {
+  jaAtendido:null,
+  jaSeguradoras:new Set(),
+  novas:{},
+  v:{},
+  errors:{},
+  submitting:false,
+  submitError:''
+};
+let tabIdx = 0;
+
+/* ---------------- persistência local (rascunho) ---------------- */
+function saveDraft(){
+  try{
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({
+      jaAtendido:S.jaAtendido,
+      jaSeguradoras:[...S.jaSeguradoras],
+      novas:S.novas, v:S.v, tabIdx:tabIdx, ts:Date.now()
+    }));
+  }catch(e){}
+}
+function loadDraft(){
+  try{
+    const raw = localStorage.getItem(DRAFT_KEY); if(!raw) return false;
+    const d = JSON.parse(raw);
+    if(!d || (Date.now() - (d.ts||0)) > 1000*60*60*24*30) return false;
+    S.jaAtendido = d.jaAtendido || null;
+    S.jaSeguradoras = new Set(d.jaSeguradoras||[]);
+    S.novas = d.novas || {};
+    S.v = d.v || {};
+    tabIdx = Math.min(d.tabIdx||0, TABS.length-1);
+    return true;
+  }catch(e){ return false; }
+}
+function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+
+/* ---------------- helpers ---------------- */
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function digits(s){ return String(s||'').replace(/\D/g,''); }
+
+function maskDoc(v){ // CPF ou CNPJ
+  const d = digits(v).slice(0,14);
+  if(d.length<=11) return d.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  return d.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d{1,2})$/,'$1-$2');
+}
+function maskPhone(v){ const d=digits(v).slice(0,11); if(d.length<=10) return d.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{4})(\d{1,4})$/,'$1-$2'); return d.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d{1,4})$/,'$1-$2'); }
+const MASKS = { doc:maskDoc, phone:maskPhone };
+
+function validCPF(v){
+  const c = digits(v); if(c.length!==11 || /^(\d)\1{10}$/.test(c)) return false;
+  let s=0; for(let i=0;i<9;i++) s+=parseInt(c[i])*(10-i);
+  let r=(s*10)%11; if(r===10) r=0; if(r!==parseInt(c[9])) return false;
+  s=0; for(let i=0;i<10;i++) s+=parseInt(c[i])*(11-i);
+  r=(s*10)%11; if(r===10) r=0; return r===parseInt(c[10]);
+}
+function validCNPJ(v){
+  const c = digits(v); if(c.length!==14 || /^(\d)\1{13}$/.test(c)) return false;
+  const calc=(len)=>{ let n=0,p=len-7; for(let i=len;i>=1;i--){ n+=parseInt(c[len-i])*p--; if(p<2)p=9; } const r=n%11; return r<2?0:11-r; };
+  return calc(12)===parseInt(c[12]) && calc(13)===parseInt(c[13]);
+}
+function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v||'').trim()); }
+function validPhone(v){ const d=digits(v); return d.length===10 || d.length===11; }
+
+function personTypeFromDoc(){
+  const d = digits(S.v['cnpj_corretora']);
+  if(d.length===14) return 'CNPJ';
+  if(d.length===11) return 'CPF';
+  return null;
+}
+function novasList(){ return Object.keys(S.novas).filter(n=>S.novas[n].mode==='novo'); }
+function transferList(){ return Object.keys(S.novas).filter(n=>S.novas[n].mode==='transferencia'); }
+function blockedSet(){
+  const b = new Set();
+  S.jaSeguradoras.forEach(n=>{ (OVERLAP[n]||[]).forEach(x=>b.add(x)); });
+  return b;
+}
+function docsPendentes(){
+  const out = [];
+  if(transferList().length) out.push('Carta de Nomeação/Transferência assinada — '+transferList().join(', '));
+  if(novasList().length){
+    const pt = personTypeFromDoc();
+    if(pt) out.push('Ficha de cadastro '+pt+' preenchida e assinada');
+    GENERAL_DOCS.forEach(d=>out.push(d));
+  }
+  return out;
+}
+
+/* ---------------- componentes ---------------- */
+function icard(name, opts){
+  opts = opts||{};
+  const isSelected = !!S.novas[name];
+  const isBlocked = opts.blocked && opts.blocked.has(name) && !S.jaSeguradoras.has(name);
+  const isAlready = S.jaSeguradoras.has(name);
+  let cls='icard'+(isSelected?' on':'')+(isBlocked?' blocked':'')+(isAlready?' already':'');
+  if(isBlocked){
+    const conflictWith = [...S.jaSeguradoras].find(j=>(OVERLAP[j]||[]).includes(name));
+    return '<div class="'+cls+'" title="Conflito de overlap com '+esc(conflictWith)+'"><div class="name">'+esc(name)+'</div><div class="badge">🔒</div></div>';
+  }
+  if(isAlready){
+    return '<div class="'+cls+'" title="Já atendido pela Segura"><div class="name">'+esc(name)+'</div><div class="badge">✓</div></div>';
+  }
+  let mini='';
+  if(isSelected){
+    const mode = S.novas[name].mode;
+    mini = '<div class="mode-row">'
+      + '<div class="mode-pill'+(mode==='novo'?' on':'')+'" data-mode="novo" data-modefor="'+esc(name)+'">Cadastro novo</div>'
+      + '<div class="mode-pill'+(mode==='transferencia'?' on transfer':'')+'" data-mode="transferencia" data-modefor="'+esc(name)+'">Transferência para a Segura</div>'
+      + '</div>';
+  }
+  return '<div class="'+cls+'" data-select="'+esc(name)+'"><div class="name">'+esc(name)+'</div>'+mini+'</div>';
+}
+
+function field(key,label,ph,hint,opt){
+  opt = opt||{};
+  const e = S.errors[key];
+  const type = opt.type||'text';
+  return '<div class="field'+(e?' err':'')+'">'
+    + '<label class="field-label" for="f_'+key+'">'+esc(label)+(opt.required?'<span class="req">*</span>':'')+'</label>'
+    + '<input id="f_'+key+'" type="'+type+'" data-key="'+key+'"'+(opt.mask?' data-mask="'+opt.mask+'"':'')
+    + (opt.inputmode?' inputmode="'+opt.inputmode+'"':'')
+    + ' value="'+esc(S.v[key]||'')+'" placeholder="'+esc(ph||'')+'" autocomplete="off"/>'
+    + (e?'<p class="err-msg">'+esc(e)+'</p>':(hint?'<p class="hint">'+esc(hint)+'</p>':''))
+    + '</div>';
+}
+let sectionCounter = 0;
+function section(title,bodyHtml){
+  sectionCounter++;
+  return '<div class="section"><div class="section-head"><span class="num">'+sectionCounter+'</span><span class="t">'+esc(title)+'</span></div>'+bodyHtml+'</div>';
+}
+function titleBlock(eyebrow,t,sub){
+  return '<p class="eyebrow">'+esc(eyebrow)+'</p><h2 class="step-title">'+esc(t)+'</h2>'+(sub?'<p class="step-sub">'+esc(sub)+'</p>':'<div style="margin-bottom:1rem;"></div>');
+}
+
+/* ---------------- validação ---------------- */
+function validate(key){
+  const e = {};
+  const req = (k,msg)=>{ if(!String(S.v[k]||'').trim()) e[k]= msg||'Campo obrigatório.'; };
+
+  if(key==='seguradora'){
+    const d = digits(S.v['cnpj_corretora']);
+    if(!d) e['cnpj_corretora']='Informe o CNPJ ou CPF da corretora.';
+    else if(d.length!==11 && d.length!==14) e['cnpj_corretora']='Documento incompleto — informe 11 dígitos (CPF) ou 14 (CNPJ).';
+    else if(d.length===11 && !validCPF(d)) e['cnpj_corretora']='CPF inválido.';
+    else if(d.length===14 && !validCNPJ(d)) e['cnpj_corretora']='CNPJ inválido.';
+
+    req('nome_corretora','Informe o nome da corretora.');
+    if(!validPhone(S.v['telefone_corretora'])) e['telefone_corretora']='Telefone inválido — use DDD + número.';
+    req('susep','Informe o código SUSEP.');
+    if(!validEmail(S.v['email_comercial'])) e['email_comercial']='E-mail inválido.';
+
+    if(!S.jaAtendido) e['_jaAtendido']='Responda se você já é atendido pela Segura.';
+    if(S.jaAtendido==='sim' && S.jaSeguradoras.size===0) e['_jaSeg']='Selecione ao menos uma seguradora em que já é atendido.';
+    if(S.jaAtendido && Object.keys(S.novas).length===0) e['_novas']='Selecione ao menos uma seguradora em que quer ser atendido agora.';
+  }
+  return e;
+}
+function stepValid(key){ return Object.keys(validate(key)).length===0; }
+function maxReachable(){ return stepValid('seguradora') ? 1 : 0; }
+
+/* ---------------- render ---------------- */
+function buildTabs(){
+  document.getElementById('tabs').innerHTML = TABS.map((t,i)=>{
+    let cls = 'tab';
+    if(i===tabIdx) cls+=' active'; else if(i<tabIdx) cls+=' done'; else if(i>maxReachable()) cls+=' locked';
+    return '<div class="'+cls+'" data-idx="'+i+'"><span class="tab-num">'+(i+1)+'</span><div><div class="tab-title">'+esc(t.title)+'</div><div class="tab-sub">'+esc(t.sub)+'</div></div></div>';
+  }).join('');
+}
+
+function render(){
+  buildTabs();
+  const c = document.getElementById('content');
+  const key = TABS[tabIdx].key;
+  let h = '';
+
+  if(key==='seguradora'){
+    h += titleBlock('Etapa 1 de 2','Seguradora','Informe os dados da corretora e selecione as seguradoras em que deseja ser atendido pela Segura.');
+    sectionCounter = 0;
+
+    h += section('Dados principais',
+      '<div class="field-row">'
+      + field('cnpj_corretora','CNPJ ou CPF da corretora','00.000.000/0000-00','',{required:true, mask:'doc', inputmode:'numeric'})
+      + field('nome_corretora','Nome da corretora','','',{required:true})
+      + '</div>'
+      + '<div class="field-row">'
+      + field('telefone_corretora','Telefone/celular da corretora','(11) 90000-0000','',{required:true,mask:'phone',inputmode:'tel',type:'tel'})
+      + field('email_comercial','E-mail comercial da corretora','contato@corretora.com.br','',{required:true,type:'email',inputmode:'email'})
+      + '</div>'
+      + '<div class="field-row">'
+      + field('susep','Código SUSEP','','',{required:true})
+      + '<div></div>'
+      + '</div>'
+    );
+
+    let seg = '<p class="q-label">Hoje você já é atendido pela Segura?<span class="req">*</span></p>';
+    seg += '<div class="yn-row" style="margin-bottom:'+(S.errors['_jaAtendido']?'4px':'20px')+';">'
+      + '<div class="yn'+(S.jaAtendido==='sim'?' on':'')+'" data-key="jaAtendido" data-val="sim">Sim, já sou atendido</div>'
+      + '<div class="yn'+(S.jaAtendido==='nao'?' on':'')+'" data-key="jaAtendido" data-val="nao">Não, ainda não</div>'
+      + '</div>';
+    if(S.errors['_jaAtendido']) seg += '<p class="err-msg" style="margin-bottom:16px;">'+esc(S.errors['_jaAtendido'])+'</p>';
+
+    if(S.jaAtendido==='sim'){
+      seg += '<p class="q-label">Em quais seguradoras você já é atendido pela Segura?<span class="req">*</span></p>';
+      seg += '<div class="insurer-grid" style="margin:8px 0 '+(S.errors['_jaSeg']?'6px':'22px')+';">'+insurers.map(n=>{
+        const on = S.jaSeguradoras.has(n);
+        return '<div class="icard'+(on?' on':'')+'" data-jaseg="'+esc(n)+'"><div class="name">'+esc(n)+'</div></div>';
+      }).join('')+'</div>';
+      if(S.errors['_jaSeg']) seg += '<p class="err-msg" style="margin-bottom:18px;">'+esc(S.errors['_jaSeg'])+'</p>';
+    }
+    if(S.jaAtendido){
+      const blocked = S.jaAtendido==='sim' ? blockedSet() : new Set();
+      seg += '<p class="q-label">Em quais seguradoras você quer ser atendido agora?<span class="req">*</span></p>';
+      seg += '<p class="hint" style="margin-bottom:12px;">'+(S.jaAtendido==='sim' ? 'As em vermelho têm conflito de overlap com uma seguradora em que você já é atendido. Ao selecionar uma nova, diga se já tem cadastro nela ou se é um cadastro novo.' : 'Ao selecionar, diga se já tem cadastro nessa seguradora (transferência) ou se é um cadastro novo.')+'</p>';
+      seg += '<div class="insurer-grid">'+insurers.map(n=>icard(n,{blocked})).join('')+'</div>';
+      if(S.errors['_novas']) seg += '<p class="err-msg" style="margin-top:10px;">'+esc(S.errors['_novas'])+'</p>';
+    }
+    h += section('Seguradoras', seg);
+  }
+
+  else if(key==='finalizar'){
+    h += titleBlock('Etapa 2 de 2','Finalizar','Confira os dados antes de enviar. Nosso time de cadastro entra em contato pelo e-mail informado para acompanhar cada processo e solicitar a documentação.');
+    if(S.jaAtendido==='sim' && S.jaSeguradoras.size){
+      h += '<div class="summary-block"><p class="summary-label g">Já atendido pela Segura</p><div>'+[...S.jaSeguradoras].map(n=>'<span class="pill g">'+esc(n)+'</span>').join('')+'</div></div>';
+    }
+    const novo = novasList(); const transf = transferList();
+    h += '<div class="summary-block"><p class="summary-label g">Cadastro novo</p><div>'+(novo.length?novo.map(n=>'<span class="pill g">'+esc(n)+'</span>').join(''):'<span style="font-size:13px;color:var(--ink-soft)">Nenhuma</span>')+'</div></div>';
+    h += '<div class="summary-block" style="background:#FFF4E9;"><p class="summary-label" style="color:#9A5B10;">Transferência (já cadastrado)</p><div>'+(transf.length?transf.map(n=>'<span class="pill" style="background:#FFEBD2;color:#9A5B10;">'+esc(n)+'</span>').join(''):'<span style="font-size:13px;color:var(--ink-soft)">Nenhuma</span>')+'</div></div>';
+
+    const rows = [
+      ['Corretora', S.v['nome_corretora']],
+      ['CNPJ/CPF', S.v['cnpj_corretora']],
+      ['SUSEP', S.v['susep']],
+      ['E-mail comercial', S.v['email_comercial']],
+      ['Telefone', S.v['telefone_corretora']]
+    ].filter(r=>r[1]);
+    h += '<dl class="kv">'+rows.map(r=>'<dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd>').join('')+'</dl>';
+    h += '<div class="infobox" style="margin-top:18px;">Ao enviar, seus dados vão direto para o time de cadastro da Segura. Dúvidas: <b>'+esc(CONFIG.EMAIL_SUPORTE)+'</b>.</div>';
+  }
+
+  c.innerHTML = h;
+  document.getElementById('form-error').innerHTML = S.submitError ? '<div class="errbox">'+esc(S.submitError)+'</div>' : '';
+  document.getElementById('back').style.visibility = tabIdx===0 ? 'hidden' : 'visible';
+  const next = document.getElementById('next');
+  document.getElementById('next-label').textContent = S.submitting ? 'Enviando…' : (tabIdx===TABS.length-1 ? 'Enviar cadastro' : 'Continuar');
+  next.classList.toggle('loading', S.submitting);
+  next.disabled = S.submitting;
+  document.getElementById('draft-note').innerHTML = (Object.keys(S.v).length||Object.keys(S.novas).length)
+    ? 'Suas respostas ficam salvas neste navegador. <a id="reset-draft">Recomeçar do zero</a>' : '';
+  saveDraft();
+}
+
+/* ---------------- payload ---------------- */
+function buildPayload(){
+  const novo = novasList(), transf = transferList();
+  const pend = docsPendentes();
+  const p = {
+    data_envio: new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}),
+    protocolo: 'SEG-'+Date.now().toString(36).toUpperCase(),
+    tipo_pessoa: personTypeFromDoc()||'',
+    cnpj_corretora: S.v['cnpj_corretora']||'',
+    nome_corretora: S.v['nome_corretora']||'',
+    susep: S.v['susep']||'',
+    email_comercial: S.v['email_comercial']||'',
+    telefone_corretora: S.v['telefone_corretora']||'',
+    ja_atendido: S.jaAtendido==='sim' ? 'Sim' : 'Não',
+    seguradoras_ja_atendido: [...S.jaSeguradoras].join(', '),
+    seguradoras_cadastro_novo: novo.join(', '),
+    seguradoras_transferencia: transf.join(', '),
+    qtd_cadastro_novo: String(novo.length),
+    qtd_transferencia: String(transf.length),
+    tipo_solicitacao: novo.length && transf.length ? 'Misto' : (novo.length ? 'Cadastro novo' : 'Transferência'),
+    documentos_pendentes: pend.join('\n• '),
+    qtd_documentos_pendentes: String(pend.length),
+    origem: location.href
+  };
+  p.slack_text = buildSlackText(p);
+  p.slack_blocks = JSON.stringify(buildSlackBlocks(p));
+  return p;
+}
+
+function buildSlackText(p){
+  const L = [];
+  L.push('*Novo cadastro de corretora* · '+p.tipo_solicitacao);
+  L.push('*'+(p.nome_corretora||'—')+'*  ·  '+(p.cnpj_corretora||'—')+'  ·  SUSEP '+(p.susep||'—'));
+  L.push('');
+  if(p.seguradoras_cadastro_novo) L.push('🆕 *Cadastro novo:* '+p.seguradoras_cadastro_novo);
+  if(p.seguradoras_transferencia) L.push('🔁 *Transferência:* '+p.seguradoras_transferencia);
+  if(p.seguradoras_ja_atendido) L.push('✅ *Já atendido:* '+p.seguradoras_ja_atendido);
+  L.push('');
+  L.push('*Contato:* '+(p.email_comercial||'—')+'  ·  '+(p.telefone_corretora||'—'));
+  L.push('');
+  L.push('*Documentos a solicitar ('+p.qtd_documentos_pendentes+'):*\n• '+p.documentos_pendentes);
+  L.push('');
+  L.push('_Protocolo '+p.protocolo+' · '+p.data_envio+'_');
+  return L.join('\n');
+}
+
+function buildSlackBlocks(p){
+  const fields = [
+    ['Tipo', p.tipo_solicitacao],
+    ['CNPJ/CPF', p.cnpj_corretora],
+    ['SUSEP', p.susep],
+    ['E-mail comercial', p.email_comercial],
+    ['Telefone', p.telefone_corretora]
+  ].filter(f=>f[1]).map(f=>({type:'mrkdwn', text:'*'+f[0]+'*\n'+f[1]}));
+
+  const blocks = [
+    {type:'header', text:{type:'plain_text', text:'Novo cadastro: '+(p.nome_corretora||'corretora sem nome'), emoji:true}},
+    {type:'section', fields:fields}
+  ];
+  const segLines = [];
+  if(p.seguradoras_cadastro_novo) segLines.push('🆕 *Cadastro novo:* '+p.seguradoras_cadastro_novo);
+  if(p.seguradoras_transferencia) segLines.push('🔁 *Transferência:* '+p.seguradoras_transferencia);
+  if(p.seguradoras_ja_atendido) segLines.push('✅ *Já atendido:* '+p.seguradoras_ja_atendido);
+  if(segLines.length) blocks.push({type:'section', text:{type:'mrkdwn', text:segLines.join('\n')}});
+
+  blocks.push({type:'section', text:{type:'mrkdwn', text:'*Documentos a solicitar ('+p.qtd_documentos_pendentes+'):*\n• '+p.documentos_pendentes}});
+  blocks.push({type:'context', elements:[{type:'mrkdwn', text:'Protocolo `'+p.protocolo+'` · '+p.data_envio}]});
+  return blocks;
+}
+
+/* ---------------- envio ---------------- */
+async function submitForm(){
+  if(!CONFIG.WEBHOOK_URL || CONFIG.WEBHOOK_URL.indexOf('http')!==0){
+    S.submitError = 'O formulário ainda não está conectado ao canal de envio. Avise o time da Segura.';
+    render(); return;
+  }
+  S.submitting = true; S.submitError=''; render();
+  const payload = buildPayload();
+  const body = new URLSearchParams(payload); // form-urlencoded = sem preflight CORS
+  let ok = false;
+  try{
+    const res = await fetch(CONFIG.WEBHOOK_URL, {method:'POST', body:body});
+    ok = res.ok || res.type === 'opaque';
+  }catch(err){
+    try{ // fallback: o POST chega, só não conseguimos ler a resposta
+      await fetch(CONFIG.WEBHOOK_URL, {method:'POST', mode:'no-cors', body:body});
+      ok = true;
+    }catch(e2){ ok = false; }
+  }
+  S.submitting = false;
+  if(ok){ clearDraft(); showDone(payload.protocolo); }
+  else { S.submitError = 'Não conseguimos enviar agora. Verifique sua conexão e tente de novo — ou mande os dados para '+CONFIG.EMAIL_SUPORTE+'.'; render(); }
+}
+
+function showDone(protocolo){
+  document.getElementById('tabs').style.display='none';
+  document.getElementById('draft-note').innerHTML='';
+  document.getElementById('card').innerHTML = '<div class="done-screen">'
+    + '<div class="done-badge">✓</div>'
+    + '<h2 class="step-title" style="margin-top:4px;">Cadastro enviado</h2>'
+    + '<p class="step-sub" style="max-width:520px;">Ficamos muito felizes em saber que você deseja contar com o suporte comercial da Segura. Nosso time de cadastro vai entrar em contato pelo e-mail informado com os modelos de documento e o passo a passo de cada seguradora. 💚</p>'
+    + '<div class="protocol">Protocolo '+esc(protocolo)+'</div>'
+    + '</div>';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ---------------- eventos ---------------- */
+function goNext(){
+  const key = TABS[tabIdx].key;
+  S.errors = validate(key);
+  if(Object.keys(S.errors).length){
+    render();
+    const first = document.querySelector('.field.err, .err-msg');
+    if(first) first.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  if(tabIdx < TABS.length-1){ tabIdx++; S.errors={}; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+  else { submitForm(); }
+}
+
+function attachHandlers(){
+  document.getElementById('tabs').addEventListener('click', e=>{
+    const t = e.target.closest('.tab'); if(!t) return;
+    const idx = parseInt(t.dataset.idx,10);
+    if(idx<=maxReachable()){ tabIdx = idx; S.errors={}; render(); }
+  });
+
+  document.getElementById('content').addEventListener('click', e=>{
+    const modePill = e.target.closest('[data-modefor]');
+    if(modePill){
+      const n = modePill.dataset.modefor;
+      if(S.novas[n]){ S.novas[n].mode = modePill.dataset.mode; }
+      render(); return;
+    }
+    const ic = e.target.closest('.icard');
+    if(ic && ic.dataset.select){
+      const n = ic.dataset.select;
+      if(S.novas[n]) delete S.novas[n]; else S.novas[n] = {mode:'novo'};
+      delete S.errors['_novas']; render(); return;
+    }
+    if(ic && ic.dataset.jaseg){
+      const n = ic.dataset.jaseg;
+      S.jaSeguradoras.has(n) ? S.jaSeguradoras.delete(n) : S.jaSeguradoras.add(n);
+      if(S.novas[n]) delete S.novas[n];
+      delete S.errors['_jaSeg']; render(); return;
+    }
+    const yn = e.target.closest('.yn');
+    if(yn){
+      if(yn.dataset.key==='jaAtendido'){
+        S.jaAtendido = yn.dataset.val;
+        if(yn.dataset.val==='nao'){ S.jaSeguradoras=new Set(); }
+        delete S.errors['_jaAtendido'];
+      } else {
+        S.v[yn.dataset.key] = yn.dataset.val;
+        delete S.errors[yn.dataset.key];
+      }
+      render(); return;
+    }
+  });
+
+  document.getElementById('content').addEventListener('input', e=>{
+    const k = e.target.dataset.key; if(!k) return;
+    const m = e.target.dataset.mask;
+    if(m && MASKS[m]){
+      const atEnd = e.target.selectionStart === e.target.value.length;
+      const masked = MASKS[m](e.target.value);
+      if(masked !== e.target.value){
+        e.target.value = masked;
+        if(atEnd) e.target.setSelectionRange(masked.length, masked.length);
+      }
+    }
+    S.v[k] = e.target.value;
+    if(S.errors[k]){
+      delete S.errors[k];
+      const f = e.target.closest('.field');
+      if(f){ f.classList.remove('err'); const em=f.querySelector('.err-msg'); if(em) em.remove(); }
+    }
+    saveDraft();
+  });
+
+  document.getElementById('back').onclick = ()=>{ if(tabIdx>0){ tabIdx--; S.errors={}; render(); window.scrollTo({top:0,behavior:'smooth'}); } };
+  document.getElementById('next').onclick = goNext;
+
+  document.getElementById('draft-note').addEventListener('click', e=>{
+    if(e.target.id!=='reset-draft') return;
+    clearDraft();
+    S.jaAtendido=null; S.jaSeguradoras=new Set(); S.novas={}; S.v={};
+    S.errors={}; S.submitError=''; tabIdx=0;
+    render(); window.scrollTo({top:0,behavior:'smooth'});
+  });
+}
+
+if(!CONFIG.WEBHOOK_URL || CONFIG.WEBHOOK_URL.indexOf('http')!==0){
+  document.getElementById('setup-warn').innerHTML =
+    '<div class="setup-warn"><b>Configuração pendente:</b> cole a URL do Catch Hook do Zapier em <code>CONFIG.WEBHOOK_URL</code>, no topo do &lt;script&gt; deste arquivo. Enquanto isso, o envio fica bloqueado.</div>';
+}
+
+loadDraft();
+attachHandlers();
+render();
+</script>
+</body>
+</html>
